@@ -5,13 +5,21 @@
 #include "opencv2/highgui/highgui.hpp"
 //#include <opencv2\cv.h>
 #include "opencv2/opencv.hpp"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h> 
 
 using namespace std;
 using namespace cv;
 //initial min and max HSV filter values.
 //these will be changed using trackbars
 int H_MIN = 0;
-int H_MAX = 256;
+int H_MAX = 121;
 int S_MIN = 0;
 int S_MAX = 256;
 int V_MIN = 209;
@@ -182,6 +190,93 @@ void trackFilteredObject(int &x, int &y, Mat threshold, Mat &cameraFeed) {
 		else putText(cameraFeed, "TOO MUCH NOISE! ADJUST FILTER", Point(0, 50), 1, 2, Scalar(0, 0, 255), 2);
 	}
 }
+
+/* HERE ENDS THE VIDEOTOOL CODE */
+
+
+
+
+/* HERE STARTS THE CLIENT CODE */
+
+
+void error(const char *msg)
+{
+    perror(msg);
+    exit(0);
+}
+
+
+void move(char *c){
+
+    int sockfd, portno, n;
+    struct sockaddr_in serv_addr;
+    struct hostent *server;
+    
+    char buffer[256];
+    
+    /* if (argc < 3) {
+       fprintf(stderr,"usage %s hostname port\n", argv[0]);
+       exit(0);
+    } */
+    
+    portno = 20232;              //portno = atoi(argv[2]);   // Port-ul
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    
+    if (sockfd < 0) 
+        error("ERROR opening socket");
+        
+    server = gethostbyname("193.226.12.217");          //server = gethostbyname(argv[1]);   //adresa IP a serverului
+    if (server == NULL) {
+        fprintf(stderr,"ERROR, no such host\n");
+        exit(0);
+    }
+    
+    bzero((char *) &serv_addr, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    
+    bcopy((char *)server->h_addr, 
+         (char *)&serv_addr.sin_addr.s_addr,
+         server->h_length);
+         
+    serv_addr.sin_port = htons(portno);
+    
+    if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) 
+        error("ERROR connecting");
+           
+    //printf("Please enter the message: ");  //comanda pt miscare
+    
+    bzero(buffer,256);
+    strcpy(buffer,c);
+    //fgets(buffer,255,stdin);
+    
+    n = write(sockfd,buffer,strlen(buffer));
+    if (n < 0) 
+         error("ERROR writing to socket");
+         
+    bzero(buffer,256);
+    
+    n = read(sockfd,buffer,255);
+    if (n < 0) 
+         error("ERROR reading from socket");
+         
+    printf("%s\n",buffer);
+    close(sockfd);
+    }
+
+void comanda(char *aux){
+    int i;
+    char *tmp;
+    
+    for(i=0;i<strlen(aux);i++){
+      if(aux[i]=='102' || aux[i]=='115' || aux[i]=='98' || aux[i]=='108' || aux[i]=='114'){  //strchr("fslrb",aux[i]);
+          sprintf(tmp,"%c",aux[i]);
+          move(tmp);
+          sleep(1);
+        }
+    }
+}
+
+
 int main(int argc, char* argv[])
 {
 
@@ -189,6 +284,9 @@ int main(int argc, char* argv[])
 	//program
 	bool trackObjects = true;
 	bool useMorphOps = true;
+ 
+   int ok=0;
+   char st;
 
 	Point p;
 	//Matrix to store each frame of the webcam feed
@@ -201,6 +299,7 @@ int main(int argc, char* argv[])
   Mat threshold2;
 	//x and y values for the location of the object
 	int x = 0, y = 0;
+  int x2 = 0, y2 = 0;
 	//create slider bars for HSV filtering
 	createTrackbars();
 	//video capture object to acquire webcam feed
@@ -213,14 +312,21 @@ int main(int argc, char* argv[])
 	//start an infinite loop where webcam feed is copied to cameraFeed matrix
 	//all of our operations will be performed within this loop
 
-
-
-	
-	while (1) {
+  cout<<"Do you want to start? Y/N \n";
+  cin>>st;
+  if(strchr("Y",st))
+    ok=1;
+  
+	int flag = 1;
+	while (flag) {
 
 
 		//store image to matrix
 		capture.read(cameraFeed);
+    if(cameraFeed.empty()){
+      printf("Stream error! \n");
+      exit(1);
+      }
 		//convert frame from BGR to HSV colorspace
 		cvtColor(cameraFeed, HSV, COLOR_BGR2HSV);
     cvtColor(cameraFeed, HSV2, COLOR_BGR2HSV);
@@ -239,9 +345,14 @@ int main(int argc, char* argv[])
 		//filtered object
 		if (trackObjects){
 			trackFilteredObject(x, y, threshold, cameraFeed);
-      trackFilteredObject(x, y, threshold2, cameraFeed);
+      trackFilteredObject(x2, y2, threshold2, cameraFeed);
    }
-
+   
+    if ((x && y) && (x2 && y2))
+      flag = 1;
+    else 
+      flag = 0;
+    
 		//show frames
 		imshow(windowName2, threshold);
 		imshow(windowName, cameraFeed);
@@ -251,7 +362,33 @@ int main(int argc, char* argv[])
 		//image will not appear without this waitKey() command
 		waitKey(30);
 	}
-
+ 
+  move("s");
 	return 0;
 }
 
+/*
+
+//Suntem in stanga adversarului
+
+if (trackObjects){
+			trackFilteredObject(x, y, threshold, cameraFeed);
+      trackFilteredObject(x2, y2, threshold2, cameraFeed);
+   }
+   
+if( (x-x2) < 0)
+{
+  if(a<x){
+    if(b<y)
+      move("r");
+    else
+      move("l");
+  }
+  else {
+  
+    
+    
+    
+    
+a=x;
+b=y;
