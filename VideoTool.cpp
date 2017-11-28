@@ -31,6 +31,8 @@ int S_MIN2 = 54;
 int S_MAX2 = 256;
 int V_MIN2 = 0;
 int V_MAX2 = 256;
+
+int x_C, y_C, r;
 //default capture width and height
 const int FRAME_WIDTH = 640;
 const int FRAME_HEIGHT = 480;
@@ -268,7 +270,7 @@ void comanda(char *aux){
     char *tmp;
     
     for(i=0;i<strlen(aux);i++){
-      if(aux[i]=='102' || aux[i]=='115' || aux[i]=='98' || aux[i]=='108' || aux[i]=='114'){  //strchr("fslrb",aux[i]);
+      if(aux[i]=='f' || aux[i]=='s' || aux[i]=='l' || aux[i]=='r' || aux[i]=='b'){  //strchr("fslrb",aux[i]);
           sprintf(tmp,"%c",aux[i]);
           move(tmp);
           sleep(1);
@@ -314,11 +316,11 @@ int main(int argc, char* argv[])
 
   cout<<"Do you want to start? Y/N \n";
   cin>>st;
-  if(strchr("Y",st))
+  if(strchr("Yy",st))
     ok=1;
   
 	int flag = 1;
-	while (flag) {
+	while (1) {
 
 
 		//store image to matrix
@@ -348,10 +350,10 @@ int main(int argc, char* argv[])
       trackFilteredObject(x2, y2, threshold2, cameraFeed);
    }
    
-    if ((x && y) && (x2 && y2))
+    /* if ((x && y) && (x2 && y2))
       flag = 1;
     else 
-      flag = 0;
+      flag = 0; */
     
 		//show frames
 		imshow(windowName2, threshold);
@@ -363,32 +365,82 @@ int main(int argc, char* argv[])
 		waitKey(30);
 	}
  
-  move("s");
+  move("s"); 
 	return 0;
 }
 
 /*
 
+
+while( ( (x2-x_C) < 300 && (y2-y_C) < 300 ) || ( (x2-x_C) < 300 && (y2-y_C) > -300 ) || ( (x2-x_C) > -300 && (y2-y_C) > -300 ) || ( (x2-x_C) > -300 && (y2-y_C) < 300 ) ) {}
+
 //Suntem in stanga adversarului
 
-if (trackObjects){
+
+   if (trackObjects){
 			trackFilteredObject(x, y, threshold, cameraFeed);
       trackFilteredObject(x2, y2, threshold2, cameraFeed);
    }
    
-if( (x-x2) < 0)
-{
+if((x - x2) < -10)  // marja de eroare de 10 pixeli{
+
+  move("fs");
+  
   if(a<x){
     if(b<y)
-      move("r");
+      move("rs");
     else
-      move("l");
+      move("ls");
   }
   else {
+    if(b>y)
+      move("ls");
+    else
+      move("rs");
+      }
+  }
   
+  else if ((x - x2) > 10) {
+  
+    move("fs");
+    
+    if(a<x){
+      if(b<y)
+        move("rs");
+      else
+        move("ls");
+    }
+    else {
+      if(b>y)
+        move("rs");
+      else
+        move("ls");
+        }
+  }
+  
+  else if ( ( (x-x2)>-10 && (x-x2)<10 ) && y<y2) {
+  
+    move("fs");
+    
+    if(b<y)
+      move("fs");
+    else
+      move("rs");
+  }
+  
+  else if ( ( (x-x2)>-10 && (x-x2)<10 ) && y>y2) {
+  
+    move("fs");
+    
+    if(b>y)
+      move("fs");
+    else
+      move("rs");
+  }
+      
+  a=x; - fostul X
+  b=y; - fostul Y
     
     
-    
-    
-a=x;
-b=y;
+
+*/
