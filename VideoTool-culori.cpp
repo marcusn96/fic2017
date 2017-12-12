@@ -19,17 +19,17 @@ using namespace cv;
 //initial min and max HSV filter values.
 //these will be changed using trackbars
 int H_MIN = 0;
-int H_MAX = 94;
-int S_MIN = 41;
+int H_MAX = 102;
+int S_MIN = 0;
 int S_MAX = 256;
-int V_MIN = 240;
+int V_MIN = 181;
 int V_MAX = 256;
 
 int H_MIN2 = 0;
-int H_MAX2 = 60;
+int H_MAX2 = 95;
 int S_MIN2 = 0;
 int S_MAX2 = 256;
-int V_MIN2 = 239;
+int V_MIN2 = 181;
 int V_MAX2 = 256;
 
 int x_C, y_C, r;
@@ -265,7 +265,7 @@ void move(char *c){
     close(sockfd);
     }
 
-/* void comanda(char *aux){
+void comanda(char *aux){
     int i;
     char *tmp;
     
@@ -277,7 +277,7 @@ void move(char *c){
         }
     }
 }
-*/
+
 
 int main(int argc, char* argv[])
 {
@@ -287,7 +287,7 @@ int main(int argc, char* argv[])
 	bool trackObjects = true;
 	bool useMorphOps = true;
  
-   //int ok=0;
+   int ok=0;
    char st;
 
 	Point p;
@@ -302,7 +302,6 @@ int main(int argc, char* argv[])
 	//x and y values for the location of the object
 	int x = 0, y = 0;
   int x2 = 0, y2 = 0;
-  int a, b;
 	//create slider bars for HSV filtering
 	createTrackbars();
 	//video capture object to acquire webcam feed
@@ -315,12 +314,14 @@ int main(int argc, char* argv[])
 	//start an infinite loop where webcam feed is copied to cameraFeed matrix
 	//all of our operations will be performed within this loop
 
-  /* cout<<"Do you want to start? Y/N \n";
+  cout<<"Do you want to start? Y/N \n";
   cin>>st;
   if(strchr("Yy",st))
-    ok=1; */
+    ok=1;
   
+	int flag = 1;
 	while (1) {
+
 
 		//store image to matrix
 		capture.read(cameraFeed);
@@ -347,13 +348,14 @@ int main(int argc, char* argv[])
 		if (trackObjects){
 			trackFilteredObject(x, y, threshold, cameraFeed);
       trackFilteredObject(x2, y2, threshold2, cameraFeed);
-    }
-     a=x;
-     b=y;
-     x_C=290;
-     y_C=215;
-     
-    	//show frames
+   }
+   
+    /* if ((x && y) && (x2 && y2))
+      flag = 1;
+    else 
+      flag = 0; */
+    
+		//show frames
 		imshow(windowName2, threshold);
 		imshow(windowName, cameraFeed);
 		//imshow(windowName1, HSV);
@@ -361,107 +363,84 @@ int main(int argc, char* argv[])
 		//delay 30ms so that screen can refresh.
 		//image will not appear without this waitKey() command
 		waitKey(30);
-     
-      if( ( (x2-x_C) < 200 && (y2-y_C) < 200 ) || ( (x2-x_C) < 200 && (y2-y_C) > -200 ) || ( (x2-x_C) > -200 && (y2-y_C) > -200 ) || ( (x2-x_C) >         -200 && (y2-y_C) < 200 ) ) {
-      
-     if((x - x2) < -10){  // marja de eroare de 10 pixeli
-      move("f");
-      sleep(0.3);
-      move("s");
-          
-      if(a<x){
-        if(b<y){
-          move("r");
-          sleep(0.3);
-          move("s");
-          }
-        else{
-          move("l");
-          sleep(0.3);
-          move("s");
-          }
-      }
-      else {
-        if(b>y){
-          move("l");
-          sleep(0.3);
-          move("s");
-          }
-        else{
-          move("r");
-          sleep(0.3);
-          move("s");
-          }
-        }
-      }
-      
-      else if ((x - x2) > 10) {
-        move("f");
-        sleep(0.3);
-        move("s");
-                  
-        if(a<x){
-          if(b<y){
-            move("r");
-            sleep(0.3);
-            move("s");
-          }
-          else{
-            move("l");
-            sleep(0.3);
-            move("s");
-          }
-        }
-        else {
-          if(b>y){
-            move("r");
-            sleep(0.3);
-            move("s");
-          }
-          else{
-            move("l");
-            sleep(0.3);
-            move("s");
-          }
-        }
-      }
-      // dreapta
-      else if ( ( (x-x2)>-10 && (x-x2)<10 ) && y<y2) {
-        move("f");
-        sleep(0.3);
-        move("s");
-        
-        if(b<y){
-          move("f");
-          sleep(0.3);
-          move("s");
-        }
-        else{
-          move("r");
-          sleep(0.3);
-          move("s");
-        }
-      }
-      
-      else if ( ( (x-x2)>-10 && (x-x2)<10 ) && y>y2) {
-        move("f");
-        sleep(0.3);
-        move("s");
-        
-        if(b>y){
-          move("f");
-          sleep(0.3);
-          move("s");
-        }
-        else{
-          move("r");
-          sleep(0.3);
-          move("s");
-        }
-      }
-   } 
-    
 	}
-
+ 
+ // move("s"); 
 	return 0;
 }
+
+/*
+
+
+while( ( (x2-x_C) < 300 && (y2-y_C) < 300 ) || ( (x2-x_C) < 300 && (y2-y_C) > -300 ) || ( (x2-x_C) > -300 && (y2-y_C) > -300 ) || ( (x2-x_C) > -300 && (y2-y_C) < 300 ) ) {}
+
+//Suntem in stanga adversarului
+
+
+   if (trackObjects){
+			trackFilteredObject(x, y, threshold, cameraFeed);
+      trackFilteredObject(x2, y2, threshold2, cameraFeed);
+   }
+   
+if((x - x2) < -10)  // marja de eroare de 10 pixeli{
+
+  move("fs");
+  
+  if(a<x){
+    if(b<y)
+      move("rs");
+    else
+      move("ls");
+  }
+  else {
+    if(b>y)
+      move("ls");
+    else
+      move("rs");
+      }
+  }
+  
+  else if ((x - x2) > 10) {
+  
+    move("fs");
+    
+    if(a<x){
+      if(b<y)
+        move("rs");
+      else
+        move("ls");
+    }
+    else {
+      if(b>y)
+        move("rs");
+      else
+        move("ls");
+        }
+  }
+  
+  else if ( ( (x-x2)>-10 && (x-x2)<10 ) && y<y2) {
+  
+    move("fs");
+    
+    if(b<y)
+      move("fs");
+    else
+      move("rs");
+  }
+  
+  else if ( ( (x-x2)>-10 && (x-x2)<10 ) && y>y2) {
+  
+    move("fs");
+    
+    if(b>y)
+      move("fs");
+    else
+      move("rs");
+  }
+      
+  a=x; - fostul X
+  b=y; - fostul Y
+    
+    
+
+*/
